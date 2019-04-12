@@ -19,8 +19,11 @@ from sklearn.model_selection import cross_val_score
 
 from sklearn.datasets import load_digits
 from sklearn.linear_model import Perceptron
+from sklearn.linear_model import SGDClassifier
 
 from sklearn.metrics import confusion_matrix
+
+from sklearn.neural_network import MLPClassifier
 
 import graphviz
 
@@ -32,6 +35,7 @@ def main():
     CASTDecisionTree()
     naiveBayes()
     perceptron()
+    MPL()
     printClassifiersPerformances()
     print('end of script')
     return
@@ -58,11 +62,23 @@ def createTestandTrainSets(df):
 
     return
 
+def MPL():
+
+    global X_train, X_test, y_train, y_test, MPLEncodedPredictions, MPLClf
+
+    MPLClf = MLPClassifier(solver='lbfgs', alpha=1e-5, random_state=1)
+
+    MPLClf.fit(X_train, y_train)  
+    MPLEncodedPredictions = MPLClf.predict(X_test)
+
+    return
+
+
 def perceptron():
 
     global X_train, X_test, y_train, y_test, perceptronEncodedPredictions, perceptronClf
 
-    perceptronClf = Perceptron(tol=1e-3, random_state=0)
+    perceptronClf = SGDClassifier(loss='perceptron', tol=1e-3, eta0=0.5, learning_rate='constant', penalty=None)
     perceptronClf.fit(X_train, y_train)
     perceptronEncodedPredictions = perceptronClf.predict(X_test)
 
@@ -142,6 +158,15 @@ def printClassifiersPerformances():
     print('accuracy score', accuracy_score(y_test, perceptronEncodedPredictions))
     print('cross-validation: ', cross_val_score(perceptronClf, X_train, y_train, cv=10))
     print('confusion matrix: ', confusion_matrix(y_test, perceptronEncodedPredictions))
+
+    print('')
+    print('MPL classifier')
+    print('---------------------')
+    print(classification_report(y_test, MPLEncodedPredictions, target_names=['e', 'p']))
+    print('accuracy score', accuracy_score(y_test, MPLEncodedPredictions))
+    print('cross-validation: ', cross_val_score(MPLClf, X_train, y_train, cv=10))
+    print('confusion matrix: ', confusion_matrix(y_test, MPLEncodedPredictions))
+
 
     return
 
