@@ -3,9 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-# from scipy import stats
-# from statistics import mean
+import scipy.stats as ss
+from dython.nominal import associations
 
 def main():
 
@@ -13,34 +12,54 @@ def main():
     df = pd.read_csv("agaricus-lepiota.csv")
 
     panda_rules()
-    # make_barplot(df,"odor")
+    # Construct barplot ===================================================
+    make_barplot(df,"odor")
     make_barplot(df,"spore-print-color")
-    # make_pie_chart(df,"odor")
-    # make_bar_graph(df,"edibility","test1","test2")
 
-    # Show the number of mushroom in each class (edible and poisonous) ----------
-    # count_value_for_attribute(df,"odor")
+    # Make heatmap to show correlation between attribute
+    associations(df, nominal_columns="all") # Use Cramer V nominal association
+    associations(df, nominal_columns="all", theil_u=True) # Use Theil's U nominal association
 
-    # find_nb_instance_class(df)
-    # print("==============================")
-    # count_edible_mush_by_odor(df)
-    # print("==============================")
-    # count_toxic_mush_by_odor(df)
-    # print("==============================")
-    # count_toxic_mush_by_spore_color(df)
-    # print("==============================")
-    # count_edible_mush_by_spore_color(df)
-    # print("==============================")
-    # show_rules_two(df)
-    # print("==============================")
-    # show_rules_four(df)
-    # print("==============================")
+    # Construct Pie chart ===================================================
+    make_pie_chart(df,"odor")
+
+    # Show the number of mushroom for each odor =============================
+    count_value_for_attribute(df,"odor")
+
+    # Find the number of instance in each class ==============================
+    find_nb_instance_class(df)
+    print("==============================")
+
+    # Count the number of edible mush by odor ==============================
+    count_edible_mush_by_odor(df)
+    print("==============================")
+
+    # Count the number of toxic mush by odor ==============================
+    count_toxic_mush_by_odor(df)
+    print("==============================")
+
+    # Count the number of toxic mush by spore color ==============================
+    count_toxic_mush_by_spore_color(df)
+    print("==============================")
+
+    # Count the number of edible mush by spore-color ==============================
+    count_edible_mush_by_spore_color(df)
+    print("==============================")
+
+    # All mush with spore-color green are poisonous
+    show_rules_two(df)
+    print("==============================")
+
+    # All mush with habitat = leaves and cap-color = white are poisonous
+    show_rules_four(df)
+    print("==============================")
     return
 
+
 def make_barplot(df,attribute):
-    odor_count = df[attribute].value_counts()
+    value_count = df[attribute].value_counts()
     sns.set(style="darkgrid")
-    sns.barplot(odor_count.index, odor_count.values, alpha=0.9)
+    sns.barplot(value_count.index, value_count.values, alpha=0.9)
     plt.title('Frequency distribution of mushroom ' + attribute)
     plt.ylabel("Number of Occurences", fontsize=12)
     plt.xlabel(attribute, fontsize=12)
@@ -69,7 +88,6 @@ def find_nb_instance_class(df):
     print("There is "+ str(edible['edibility'].count()) + " edible mushrooms")
     print("There is "+ str(poisonous['edibility'].count()) + " poisonous mushrooms")
 
-
 def count_edible(df):
     edible = df[df['edibility'] =='e']
     num_edible = edible['edibility'].count()
@@ -86,15 +104,6 @@ def panda_rules():
     pd.options.display.max_columns = None
 
     return
-
-def make_bar_graph(df,x,y,xlabel,ylabel):
-    plt.bar(df[x],df[y]) # to make a bar graph -- first parameter is X second is Y
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-    return
-
 
 
 def count_edible_mush_by_odor(df):
@@ -127,8 +136,6 @@ def count_edible_mush_by_odor(df):
 
     return
 
-
-# À mettre dans le rapport Règle 1 pour déterminer les champignons toxiques.
 def count_toxic_mush_by_odor(df):
     almond = df[(df['edibility'] == 'p') & (df['odor'] == 'a')]
     print("There is "+ str(almond['edibility'].count()) + " toxic mushrooms who smell almond")
@@ -236,7 +243,6 @@ def count_edible_mush_by_spore_color(df):
      yellow = df[(df['edibility'] == 'e') & (df['spore-print-color'] == 'y')]
      print("There is "+ str(yellow['edibility'].count()) + " edible mushroom with yellow spore")
 
-# À mettre dans rapport -- règle numéro 4 tous les champignons qui viennent de l'habitat = leaves avec un cap blanc sont toxic
 def show_rule_one(df):
     count_toxic_mush_by_odor(df)
 
@@ -249,17 +255,5 @@ def show_rules_four(df):
     # All mush with habitat = leaves and cap-color = white are poisonous
     toxic = df[(df['habitat'] == 'l') & (df['cap-color'] == 'w')]
     print(toxic['edibility'])
-
-
-def pearson_correlation(df,x,y,xlabel,ylabel):
-    x = np.array(df[x])
-    y = np.array(df[y])
-    print(stats.pearsonr(x,y))
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.scatter(x,y)
-    plt.show()
-
-    return
 
 main()
