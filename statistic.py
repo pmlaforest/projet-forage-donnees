@@ -61,7 +61,7 @@ def make_barplot(df,attribute):
     sns.set(style="darkgrid")
     sns.barplot(value_count.index, value_count.values, alpha=0.9)
     plt.title('Frequency distribution of mushroom ' + attribute)
-    plt.ylabel("Number of Occurences", fontsize=12)
+    plt.ylabel("Number of Occurrences", fontsize=12)
     plt.xlabel(attribute, fontsize=12)
     plt.show()
 
